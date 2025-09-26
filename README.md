@@ -34,7 +34,7 @@ Follow these steps to set it up locally:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Narasimhagupta2004/Survey-tool.git
+git clone https://github.com/Oussama6776/Survey
 
 # 2. Navigate to the project folder
 cd Survey-tool
@@ -55,38 +55,15 @@ php artisan migrate
 
 # 8. Serve the application
 php artisan serve
-
-
-
-
+ 
 app/                # Application logic (Controllers, Models)
 resources/views/    # Blade templates for UI
 routes/web.php      # Web routes
 database/migrations # Table structures
 public/             # Publicly accessible files
 .env                # Environment variables (not pushed to GitHub)
-
-🧪 Testing
-You can use Laravel's built-in testing tools or test it manually by:
-
-Registering a new user
-
-Creating surveys
-
-Responding to surveys via public links
-
-Viewing collected responses
-
-🙌 Contribution
-Feel free to fork this repo and contribute. Pull requests are welcome!
-
-📃 License
-This project is open-source and available under the MIT License.
-
+ 
 👨‍💻 Author
-Narasimha Gupta
+Oussama Harouach
 GitHub Profile
-
-
-
-
+ 
