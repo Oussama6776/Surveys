@@ -6,6 +6,7 @@ use App\Models\Survey;
 use App\Models\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ResponseController extends Controller
 {
@@ -36,29 +37,77 @@ class ResponseController extends Controller
     public function store(Request $request, Survey $survey)
     {
         try {
-            $validated = $request->validate([
-                'responses' => 'required|array',
-                'responses.*.question_id' => 'required|exists:questions,id',
-                'responses.*.answer' => 'required',
-            ]);
-
             DB::beginTransaction();
 
-            $response = $survey->responses()->create([
-                'submitted_at' => now(),
-            ]);
+            $normalized = [];
+            $contactId = session('contact_authenticated_' . $survey->id);
 
-            foreach ($validated['responses'] as $responseData) {
+            if ($request->has('responses')) {
+                // Original payload format: responses[] = [{question_id, answer}]
+                $validated = $request->validate([
+                    'responses' => 'required|array',
+                    'responses.*.question_id' => 'required|exists:questions,id',
+                    'responses.*.answer' => 'required',
+                ]);
+                $normalized = $validated['responses'];
+            } else {
+                // Accept form format: answers[question_id] = value|array
+                $answers = $request->input('answers');
+                if (!is_array($answers)) {
+                    return redirect()->back()->with('error', 'Invalid submission format.')->withInput();
+                }
+
+                $questionIds = $survey->questions()->pluck('id')->toArray();
+                foreach ($answers as $qid => $value) {
+                    // Only accept answers for questions of this survey
+                    if (!in_array((int)$qid, $questionIds, true)) continue;
+                    $normalized[] = [
+                        'question_id' => (int)$qid,
+                        'answer' => $value,
+                    ];
+                }
+
+                if (empty($normalized)) {
+                    return redirect()->back()->with('error', 'Veuillez répondre au moins à une question.')->withInput();
+                }
+            }
+
+            // Build base data
+            $baseData = ['submitted_at' => now()];
+            try {
+                $baseData['ip_address'] = $request->ip();
+                $baseData['user_agent'] = $request->userAgent();
+            } catch (\Throwable $e) {}
+
+            // If a contact is authenticated for this survey, update existing response or create one
+            $response = null;
+            if (!empty($contactId) && Schema::hasColumn('responses', 'contact_id')) {
+                $response = $survey->responses()->where('contact_id', $contactId)->first();
+                if ($response) {
+                    $response->fill($baseData);
+                    $response->save();
+                    // Replace answers with new ones
+                    $response->answers()->delete();
+                } else {
+                    $payload = array_merge($baseData, ['contact_id' => $contactId]);
+                    $response = $survey->responses()->create($payload);
+                }
+            } else {
+                // Anonymous/public submission or column not yet migrated
+                $response = $survey->responses()->create($baseData);
+            }
+
+            foreach ($normalized as $item) {
                 $response->answers()->create([
-                    'question_id' => $responseData['question_id'],
-                    'answer' => is_array($responseData['answer']) ? json_encode($responseData['answer']) : $responseData['answer'],
+                    'question_id' => $item['question_id'],
+                    'answer' => is_array($item['answer']) ? json_encode($item['answer']) : $item['answer'],
                 ]);
             }
 
             DB::commit();
 
             return redirect()->route('survey.thank-you')
-                ->with('success', 'Thank you for completing the survey! Your response has been recorded.');
+                ->with('success', 'Merci, votre réponse a été enregistrée.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()

@@ -1,89 +1,101 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-        <h1 class="text-xl font-semibold text-gray-900">Surveys</h1>
-        <p class="mt-2 text-sm text-gray-700">A list of all surveys in your account.</p>
-    </div>
-    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-        <a href="{{ route('surveys.create') }}"
-           class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-            Create Survey
-        </a>
-    </div>
-</div>
+@section('title', 'Sondages')
+@section('page-title', 'Sondages')
+@section('page-description', 'Gérez vos sondages: créer, modifier, publier et analyser')
 
-<div class="mt-8 flex flex-col">
-    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-50">
+@section('content')
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 class="h4 mb-1">Mes sondages</h2>
+            <small class="text-muted">Liste et actions rapides</small>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <a href="{{ route('surveys.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Nouveau sondage
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Responses</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
-                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                <span class="sr-only">Actions</span>
-                            </th>
+                            <th>Titre</th>
+                            <th>Réponses</th>
+                            <th>Statut</th>
+                            <th>Créé le</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
+                    <tbody>
                         @forelse($surveys as $survey)
                         <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                {{ $survey->title }}
+                            <td>
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-poll text-primary me-2 mt-1"></i>
+                                    <div>
+                                        <div class="fw-semibold">{{ $survey->title }}</div>
+                                        @if($survey->description)
+                                            <small class="text-muted d-block">{{ Str::limit($survey->description, 80) }}</small>
+                                        @endif
+                                    </div>
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $survey->responses_count ?? 0 }}
+                            <td>
+                                <span class="badge bg-info text-dark">{{ $survey->responses_count ?? 0 }}</span>
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                @if(!$survey->start_date || $survey->start_date->isPast())
-                                    @if(!$survey->end_date || $survey->end_date->isFuture())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Active
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                            Ended
-                                        </span>
-                                    @endif
+                            <td>
+                                @php
+                                    $isStarted = !$survey->start_date || $survey->start_date->isPast();
+                                    $isNotEnded = !$survey->end_date || $survey->end_date->isFuture();
+                                @endphp
+                                @if($isStarted && $isNotEnded)
+                                    <span class="badge bg-success"><i class="fas fa-play-circle"></i> Actif</span>
+                                @elseif($isStarted && !$isNotEnded)
+                                    <span class="badge bg-secondary"><i class="fas fa-flag-checkered"></i> Terminé</span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        Scheduled
-                                    </span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Programmé</span>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $survey->created_at->format('M d, Y') }}
+                            <td>
+                                <small class="text-muted">{{ $survey->created_at->format('d/m/Y') }}</small>
                             </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="{{ route('surveys.show', $survey) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">View</a>
-                                <a href="{{ route('surveys.edit', $survey) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
-                                <form action="{{ route('surveys.destroy', $survey) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this survey?')">
-                                        Delete
-                                    </button>
-                                </form>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('surveys.show', $survey) }}" class="btn btn-outline-primary" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('surveys.edit', $survey) }}" class="btn btn-outline-secondary" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('surveys.destroy', $survey) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce sondage ?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-3 py-4 text-sm text-gray-500 text-center">No surveys found</td>
+                            <td colspan="5" class="text-center py-4 text-muted">Aucun sondage trouvé</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
+        <div class="card-footer bg-white">
+            <div class="d-flex justify-content-center">
+                {{ $surveys->links() }}
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="mt-4">
-    {{ $surveys->links() }}
 </div>
 @endsection 

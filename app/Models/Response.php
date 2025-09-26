@@ -11,7 +11,10 @@ class Response extends Model
 
     protected $fillable = [
         'survey_id',
+        'contact_id',
         'submitted_at',
+        'ip_address',
+        'user_agent',
     ];
 
     protected $casts = [
@@ -30,6 +33,11 @@ class Response extends Model
     public function survey()
     {
         return $this->belongsTo(Survey::class);
+    }
+
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
     }
 
     public function answers()

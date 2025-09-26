@@ -5,9 +5,9 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
             <div class="px-6 py-8 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-                <h3 class="text-2xl font-semibold text-gray-800">Add New Question</h3>
+                <h3 class="text-2xl font-semibold text-gray-800">Ajouter une question</h3>
                 <p class="mt-2 text-sm text-gray-600">
-                    Create a new question for your survey
+                    Rédigez la question puis cliquez sur « Suivant » pour en ajouter une autre, ou « Terminer » pour finaliser.
                 </p>
             </div>
 
@@ -17,7 +17,7 @@
                 <div class="px-6 py-8">
                     <div class="space-y-8">
                         <div>
-                            <label for="question_text" class="block text-sm font-medium text-gray-700 mb-2">Question Text</label>
+                            <label for="question_text" class="block text-sm font-medium text-gray-700 mb-2">Intitulé de la question</label>
                             <div class="mt-1">
                                 <input type="text" name="question_text" id="question_text" 
                                        class="block w-full px-4 py-3 border-2 border-black rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
@@ -30,7 +30,7 @@
 
                         <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
                             <div>
-                                <label for="question_type_id" class="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                                <label for="question_type_id" class="block text-sm font-medium text-gray-700 mb-2">Type de question</label>
                                 <select name="question_type_id" id="question_type_id" x-model="questionType"
                                         class="block w-full px-4 py-3 border-2 border-black rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out">
                                     @foreach($questionTypes as $type)
@@ -49,7 +49,7 @@
                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                            {{ old('is_required') ? 'checked' : '' }}>
                                     <label for="is_required" class="ml-2 block text-sm text-gray-700">
-                                        Required
+                                        Réponse obligatoire
                                     </label>
                                 </div>
                             </div>
@@ -65,7 +65,7 @@
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                         </svg>
-                                        Add Option
+                                        Ajouter une option
                                     </button>
                                 </div>
                                 <div class="space-y-4">
@@ -96,12 +96,17 @@
                 </div>
 
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <div class="flex justify-end space-x-4">
-                        <a href="{{ route('surveys.show', $survey) }}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-                            Cancel
+                    <div class="flex flex-col sm:flex-row sm:justify-end gap-3">
+                        <a href="{{ route('surveys.show', $survey) }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                            Annuler
                         </a>
-                        <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-                            Add Question
+                        <!-- Suivant: enregistre et revient sur l'ajout d'une nouvelle question -->
+                        <button type="submit" name="next_action" value="next" class="inline-flex items-center justify-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                            Suivant
+                        </button>
+                        <!-- Terminer: enregistre et redirige vers les détails du sondage -->
+                        <button type="submit" name="next_action" value="finish" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                            Terminer
                         </button>
                     </div>
                 </div>

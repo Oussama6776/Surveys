@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form action="{{ route('responses.store', $survey) }}" method="POST" class="space-y-6">
+        <form action="{{ route('responses.public.store', $survey) }}" method="POST" class="space-y-6">
             @csrf
             
             <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
